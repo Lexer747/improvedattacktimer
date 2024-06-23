@@ -51,13 +51,13 @@ class BarOverlay extends Overlay
 	private static final Dimension ATTACK_BAR_SIZE = new Dimension(30, 5);
 
 	private final Client client;
-	private final ImprovedAttackerTimerConfig config;
+	private final ImprovedAttackTimerConfig config;
 	private final ImprovedAttackTimerPlugin plugin;
 
 	private boolean shouldShowBar = false;
 
 	@Inject
-	private BarOverlay(final Client client, final ImprovedAttackerTimerConfig config,
+	private BarOverlay(final Client client, final ImprovedAttackTimerConfig config,
 			final ImprovedAttackTimerPlugin plugin)
 	{
 		this.client = client;

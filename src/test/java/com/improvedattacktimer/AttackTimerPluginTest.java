@@ -25,12 +25,12 @@ package com.improvedattacktimer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.improvedattacktimer.ImprovedAttackTimerPlugin;
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
 public class AttackTimerPluginTest
 {
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception
 	{
 		ExternalPluginManager.loadBuiltin(ImprovedAttackTimerPlugin.class);

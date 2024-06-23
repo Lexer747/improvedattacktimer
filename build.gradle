@@ -23,8 +23,18 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
+java {
+    targetCompatibility = "1.11"
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
 group = 'com.improvedattacktimer'
-version = '1.1'
+version = '1.2'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
