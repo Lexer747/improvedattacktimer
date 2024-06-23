@@ -1,6 +1,5 @@
 package com.improvedattacktimer;
 
-
 /*
  * Copyright (c) 2017, honeyhoney <https://github.com/honeyhoney>
  * Copyright (c) 2022, Nick Graves <https://github.com/ngraves95>
@@ -73,8 +72,7 @@ enum WeaponType
 	TYPE_27(ACCURATE, null, null, OTHER),
 	TYPE_28(ACCURATE, ACCURATE, LONGRANGE),
 	TYPE_29(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
-	// Weird TOA shit, only seems to happen for the keris with gems
-	TYPE_30(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE);
+	TYPE_30(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE); // Weird TOA style, only seems to happen for the keris with gems
 
 	@Getter
 	private final AttackStyle[] attackStyles;
