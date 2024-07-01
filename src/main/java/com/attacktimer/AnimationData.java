@@ -3,6 +3,7 @@ package com.attacktimer;
 /*
  * Copyright (c) 2021, Matsyir <https://github.com/matsyir>
  * Copyright (c) 2020, Mazhar <https://twitter.com/maz_rs>
+ * Copyright (c) 2024, Lexer747 <https://github.com/Lexer747>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +30,10 @@ package com.attacktimer;
 import com.google.common.collect.ImmutableMap;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import net.runelite.api.HeadIcon;
@@ -127,6 +131,7 @@ public enum AnimationData
     MELEE_ARCLIGHT_SPEC(2890, AttackStyle.SLASH, true), // https://oldschool.runescape.wiki/w/Arclight
     MELEE_SARA_SWORD_SPEC(1132, AttackStyle.SLASH, true), // https://oldschool.runescape.wiki/w/Saradomin_sword assumed to be the same for the blessed version
     MELEE_RED_KERIS_SPEC(9544, AttackStyle.SLASH, true), // https://oldschool.runescape.wiki/w/Keris_partisan_of_corruption
+    MELEE_SALAMANDER(5247, AttackStyle.SLASH), // https://oldschool.runescape.wiki/w/Salamander
 
     // RANGED
     RANGED_CHINCHOMPA(7618, AttackStyle.RANGED),
@@ -160,31 +165,43 @@ public enum AnimationData
     RANGED_WEBWEAVER_SPEC(9964, AttackStyle.RANGED, true), // https://oldschool.runescape.wiki/w/Webweaver_bow#Charged
     RANGED_BONE_CROSSBOW_SPEC(7557, AttackStyle.RANGED, true), // https://oldschool.runescape.wiki/w/Dorgeshuun_crossbow
 
-    // MAGIC - uses highest base damage available when animations are re-used. No damage = 0 damage.
-    // for example, strike/bolt/blast animation will be fire blast base damage, multi target ancient spells will be ice barrage.
-    MAGIC_STANDARD_BIND(710, AttackStyle.MAGIC), // tested w/ bind, snare, entangle
-    MAGIC_STANDARD_STRIKE_BOLT_BLAST(711, AttackStyle.MAGIC, 16), // tested w/ bolt
-    MAGIC_STANDARD_WAVE(727, AttackStyle.MAGIC, 20), // tested w/ wave spells
-    MAGIC_IBAN_BLAST(708, AttackStyle.MAGIC, 25),
-    MAGIC_STANDARD_BIND_STAFF(1161, AttackStyle.MAGIC), // tested w/ bind, snare, entangle, various staves
-    MAGIC_STANDARD_STRIKE_BOLT_BLAST_STAFF(1162, AttackStyle.MAGIC, 16), // strike, bolt and blast (tested all spells, different weapons)
-    MAGIC_STANDARD_WAVE_STAFF(1167, AttackStyle.MAGIC, 20), // tested many staves
-    MAGIC_STANDARD_SURGE_STAFF(7855, AttackStyle.MAGIC, 24), // tested many staves
-    MAGIC_ANCIENT_SINGLE_TARGET(1978, AttackStyle.MAGIC, 26), // Rush & Blitz animations (tested all 8, different weapons)
-    MAGIC_ANCIENT_MULTI_TARGET(1979, AttackStyle.MAGIC, 30), // Burst & Barrage animations (tested all 8, different weapons)
-    MAGIC_VOLATILE_NIGHTMARE_STAFF_SPEC(8532, AttackStyle.MAGIC, 66), // assume 99 mage's base damage (does not rise when boosted).
-    MAGIC_TUMEKENS_SHADOW(9493, AttackStyle.MAGIC),
-    MAGIC_ARCEUUS_GRASP(8972, AttackStyle.MAGIC),
-    MAGIC_ARCEUUS_DEMONBANE(8977, AttackStyle.MAGIC),
-    MAGIC_WARPED_SCEPTRE(10501, AttackStyle.MAGIC),
-    MAGIC_ACCURSED_SCEPTRE_SPEC(9961, AttackStyle.MAGIC);
+    // MAGIC - Keep in spellbook order (staves last) then alphabetical order and oneline
+    MAGIC_GOD_SPELL(811, AttackStyle.MAGIC, Spellbook.STANDARD), // https://oldschool.runescape.wiki/w/God_spells
+    MAGIC_IBAN_BLAST(708, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_SLAYER_DART(1576, AttackStyle.MAGIC, Spellbook.STANDARD), // https://oldschool.runescape.wiki/w/Magic_Dart
+    MAGIC_STANDARD_BIND(710, AttackStyle.MAGIC, Spellbook.STANDARD), // tested w/ bind, snare, entangle
+    MAGIC_STANDARD_BIND_STAFF(1161, AttackStyle.MAGIC, Spellbook.STANDARD), // tested w/ bind, snare, entangle, various staves
+    MAGIC_STANDARD_CONFUSE(1163, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_CRUMBLE_UNDEAD(724, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_CRUMBLE_UNDEAD_HOLDING_STAFF(1166, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_ENFEEBLE(1168, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_STRIKE_BOLT_BLAST(711, AttackStyle.MAGIC, Spellbook.STANDARD), // tested w/ bolt
+    MAGIC_STANDARD_STRIKE_BOLT_BLAST_STAFF(1162, AttackStyle.MAGIC, Spellbook.STANDARD), // strike, bolt and blast (tested all spells, different weapons)
+    MAGIC_STANDARD_STUN(1169, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_SURGE_STAFF(7855, AttackStyle.MAGIC, Spellbook.STANDARD), // tested many staves
+    MAGIC_STANDARD_VULNERABILITY_CURSE(1165, AttackStyle.MAGIC, Spellbook.STANDARD),
+    MAGIC_STANDARD_WAVE(727, AttackStyle.MAGIC, Spellbook.STANDARD), // tested w/ wave spells
+    MAGIC_STANDARD_WAVE_STAFF(1167, AttackStyle.MAGIC, Spellbook.STANDARD), // tested many staves
+    MAGIC_STANDARD_WEAKEN(1164, AttackStyle.MAGIC, Spellbook.STANDARD),
+
+    MAGIC_ANCIENT_MULTI_TARGET(1979, AttackStyle.MAGIC, Spellbook.ANCIENT), // Burst & Barrage animations (tested all 8, different weapons)
+    MAGIC_ANCIENT_SINGLE_TARGET(1978, AttackStyle.MAGIC, Spellbook.ANCIENT), // Rush & Blitz animations (tested all 8, different weapons)
+
+    MAGIC_ARCEUUS_DEMONBANE(8977, AttackStyle.MAGIC, Spellbook.ARCEUUS), // Also greater corruption, im ok with this bug for now 😅
+    MAGIC_ARCEUUS_GRASP(8972, AttackStyle.MAGIC, Spellbook.ARCEUUS),
+
+    MAGIC_ACCURSED_SCEPTRE_SPEC(9961, AttackStyle.MAGIC, true),
+    MAGIC_TUMEKENS_SHADOW(9493, AttackStyle.MAGIC, false),
+    MAGIC_WARPED_SCEPTRE(10501, AttackStyle.MAGIC, false), // https://oldschool.runescape.wiki/w/Warped_sceptre
+    MAGIC_VOLATILE_NIGHTMARE_STAFF_SPEC(8532, AttackStyle.MAGIC, true); // assume 99 mage's base damage (does not rise when boosted).
 
     private static final Map<Integer, AnimationData> DATA;
+    private static final Map<Spellbook, Set<AnimationData>> spellBookAnimations;
 
     public final int animationId;
     public final boolean isSpecial;
     public final AttackStyle attackStyle;
-    public final int baseSpellDamage;
+    private final Spellbook spellbook;
 
     // Simple animation data constructor for all melee and range attacks
     AnimationData(int animationId, AttackStyle attackStyle)
@@ -196,8 +213,9 @@ public enum AnimationData
         this.animationId = animationId;
         this.attackStyle = attackStyle;
         this.isSpecial = false;
-        this.baseSpellDamage = 0;
+        this.spellbook = null;
     }
+
     // Simple animation data constructor for all melee and range attacks w/ special
     AnimationData(int animationId, AttackStyle attackStyle, boolean isSpecial)
     {
@@ -208,33 +226,48 @@ public enum AnimationData
         this.animationId = animationId;
         this.attackStyle = attackStyle;
         this.isSpecial = isSpecial;
-        this.baseSpellDamage = 0;
+        this.spellbook = null;
     }
-    // Magic spell animation data constructor including base spell damage
-    AnimationData(int animationId, AttackStyle attackStyle, int baseSpellDamage)
+
+    // Simple animation data constructor for all magic attacks
+    AnimationData(int animationId, AttackStyle attackStyle, Spellbook book)
     {
         if (attackStyle == null)
         {
-            throw new InvalidParameterException("Attack Style and Attack Type must be valid for AnimationData");
+            throw new InvalidParameterException("Attack Style must be valid for AnimationData");
         }
         this.animationId = animationId;
         this.attackStyle = attackStyle;
         this.isSpecial = false;
-        this.baseSpellDamage = baseSpellDamage;
+        this.spellbook = book;
     }
 
     static
     {
         ImmutableMap.Builder<Integer, AnimationData> builder = new ImmutableMap.Builder<>();
+        Map<Spellbook, Set<AnimationData>> spellBookBuilder = new HashMap<>();
+
+        for (Spellbook s : Spellbook.values())
+        {
+            spellBookBuilder.put(s, new HashSet<AnimationData>());
+        }
 
         for (AnimationData data : values())
         {
-            // allow to skip animation detection by using 0 or less as the animation id.
-            if (data.animationId <= 0) { continue; }
             builder.put(data.animationId, data);
+
+            if (data.spellbook != null)
+            {
+                if (data.attackStyle != AttackStyle.MAGIC)
+                {
+                    throw new InvalidParameterException("Spell book should only be magic animations");
+                }
+                spellBookBuilder.get(data.spellbook).add(data);
+            }
         }
 
         DATA = builder.build();
+        spellBookAnimations = spellBookBuilder;
     }
 
     public static AnimationData fromId(int animationId)
@@ -242,35 +275,21 @@ public enum AnimationData
         return DATA.get(animationId);
     }
 
-    public static boolean isStandardSpellbookSpell(AnimationData animationData)
+    public static Set<AnimationData> getAnimationsForSpellbook(Spellbook s)
     {
-        return (animationData == MAGIC_STANDARD_STRIKE_BOLT_BLAST_STAFF ||
-                animationData == MAGIC_STANDARD_WAVE_STAFF ||
-                animationData == MAGIC_STANDARD_SURGE_STAFF);
+        return spellBookAnimations.get(s);
     }
 
-    public static boolean isFireSpell(AnimationData animationData)
+    public static boolean isManualCasting(AnimationData animationData)
     {
-        return (animationData == MAGIC_STANDARD_STRIKE_BOLT_BLAST_STAFF ||
-                animationData == MAGIC_STANDARD_STRIKE_BOLT_BLAST ||
-                animationData == MAGIC_STANDARD_WAVE_STAFF ||
-                animationData == MAGIC_STANDARD_SURGE_STAFF);
-    }
-
-    public static boolean isCasting(AnimationData animationData)
-    {
-        return animationData == MAGIC_STANDARD_BIND ||
-                animationData == MAGIC_STANDARD_STRIKE_BOLT_BLAST ||
-                animationData == MAGIC_STANDARD_WAVE ||
-                animationData == MAGIC_IBAN_BLAST ||
-                animationData == MAGIC_STANDARD_BIND_STAFF ||
-                animationData == MAGIC_STANDARD_STRIKE_BOLT_BLAST_STAFF ||
-                animationData == MAGIC_STANDARD_WAVE_STAFF ||
-                animationData == MAGIC_STANDARD_SURGE_STAFF ||
-                animationData == MAGIC_ANCIENT_SINGLE_TARGET ||
-                animationData == MAGIC_ANCIENT_MULTI_TARGET ||
-                animationData == MAGIC_ARCEUUS_GRASP ||
-                animationData == MAGIC_ARCEUUS_DEMONBANE;
+        // This check ensures we don't treat staff animations which are magic attacks as a "manual cast".
+        if (animationData.spellbook != null && animationData != null)
+        {
+            // We tell a manual cast by the animation data:
+            return animationData.attackStyle == AttackStyle.MAGIC &&
+                spellBookAnimations.get(animationData.spellbook).contains(animationData);
+        }
+        return false;
     }
 
     @Override
@@ -281,6 +300,15 @@ public enum AnimationData
                 .map(StringUtils::capitalize).collect(Collectors.toList()).toArray(words);
 
         return String.join(" ", words);
+    }
+
+    public boolean matchesSpellbook(Spellbook s)
+    {
+        if (this.spellbook != null)
+        {
+            return this.spellbook == s;
+        }
+        return false;
     }
 
 
